@@ -54,7 +54,9 @@
 @property (strong, nonatomic) UIImageView *scratchModeIconView;
 //SCRATCH MODE MOVIE MAKER
 @property (strong, nonatomic) CEMovieMaker *movieMaker;
-@property (strong, nonatomic) NSURL *audioURL;
+@property (strong, nonatomic) NSURL *scratchModeAudioURL;
+@property (strong, nonatomic) NSURL *scratchModeVideoURL;
+@property (strong, nonatomic) NSURL *scratchModeVideoAudioURL;
 
 
 //TUTORIAL

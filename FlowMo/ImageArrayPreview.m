@@ -44,6 +44,7 @@ BOOL ScratchModeOn = NO;
         [self addBackwardButton];
         [self addMessengerButton];
         [self firstRunCheck];
+        self.audioRecorder = [[AudioRecorder alloc]init];
         //[self.view addSubview:self.videoPlayerButton];
         //[self videoPlayerButtonConstraints];
         //[self imageSliderConstraints];
@@ -180,7 +181,7 @@ BOOL ScratchModeOn = NO;
         self.scratchModeX = [sender locationInView:self.view].x;
         [self scratchModeTimer];
         
-        self.audioRecorder = [[AudioRecorder alloc]init];
+        
         [self.audioRecorder recorderSetup];
         [self.audioRecorder recordPauseTapped];
         
@@ -253,49 +254,111 @@ BOOL ScratchModeOn = NO;
 //    }
     
     [self.movieMaker createMovieFromImages:[self.scratchModeArray copy] withCompletion:^(NSURL *fileURL){
-      //  [self addAudioToFileAtPath:<#(NSString *)#> toPath:<#(NSString *)#>]
-        [self playCapture:fileURL];
+        self.scratchModeVideoURL = fileURL;
+        NSLog(@"AUDIO memo %@", self.scratchModeAudioURL);
+        NSLog(@"video? %@", self.scratchModeVideoURL);
+        [self addAudioToFileAtPath];
     }];
 }
 
-//- (void) addAudioToFileAtPath:(NSString *)filePath toPath:(NSURL *) outputFilePath {
-//    AVMutableComposition *mixComposition = [AVMutableComposition composition]; // RETURN A NEW COMPOSITION
+//-(void) appendAudioToVideo {
+//    // 1. Create AVMutableComposition and AVMutableCompositionTracks
+//    AVMutableComposition *mixComposition = [[AVMutableComposition alloc] init];
+//    AVMutableCompositionTrack *mutableCompVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
+//    AVMutableCompositionTrack *mutableCompAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+//    //2. Convert Video Files to AVAssets
+//    CMTime currentCMTime = kCMTimeZero;
 //    
-//    NSString *audioInputFileName = @"audiofileName"; //PASS IN FILE NAME
-//    NSString *audioInputFilePath = [[NSBundle mainBundle] pathForResource:audiofileName ofType:.mp4];
-//    NSURL *audioInputFileURL = [NSURL fileURLWithPath:audioInputFilePath];
+//        NSData *videoFileData = [getMNVideoFilesTasks[i] result];
+//        NSURL *videoFileURL = self.scratchModeVideoURL;
+//        
+//        [videoFileData writeToURL:randomVideoFileURL options:NSAtomicWrite error:nil];
+//        AVAsset *videoAsset = [AVAsset assetWithURL:randomVideoFileURL];
+//        
+//        [mutableCompVideoTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.duration) ofTrack:[[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] atTime:currentCMTime error:nil];
+//        [mutableCompAudioTrack insertTimeRange:CMTimeRangeMake(kCMTimeZero, videoAsset.duration) ofTrack:[[videoAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0] atTime:currentCMTime error:nil];
+//        
+//        currentCMTime = CMTimeAdd(currentCMTime, videoAsset.duration);
 //    
-//    NSString *videoInputFileName = @"videofileName"; //PASS IN FILE NAME
-//    NSString *videoInputFilePath = [Utilities documentsPath:videoInputFileName];
-//    NSURL *videoInputFileURL = [NSURL fileURLWithPath:videoInputFilePath];
-//    
-//    NSString *outputFileName = @"outputfileName"; //PASS IN FILE NAME
-//    NSString *outputFilePath = [Utilities documentsPath:outputFileName];
-//    NSURL *outputFileURL = [NSURL fileURLWithPath:outputFilePath];
-//    
-//    if ([[NSFileManager defaultManager] fileExistsAtPath:outputFilePath])
-//        [[NSFileManager defaultManager] removeItemAtPath:outputFilePath error:nil];
-//    
-//    CMTime nextClipStartTime = kCMTimeZero;
-//    
-//    AVURLAsset *videoAsset = [[AVURLAsset alloc] initWithURL:videoInputFileURL options:nil];
-//    CMTimeRange videoTimeRange = CMTimeRangeMake(kCMTimeZero, videoAsset.duration);
-//    AVMutableCompositionTrack *compositionVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
-//    [compositionVideoTrack insertTimeRange:videoTimeRange ofTrack:[[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] atTime:nextClipStartTime error:nil];
-//    
-//    AVURLAsset *audioAsset = [[AVURLAsset alloc] initWithURL:audioInputFileURL options:nil];
-//    CMTimeRange audioTimeRange = CMTimeRangeMake(kCMTimeZero, audioAsset.duration);
-//    AVMutableCompositionTrack *compositionAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
-//    [compositionAudioTrack insertTimeRange:audioTimeRange ofTrack:[[audioAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0] atTime:nextClipStartTime error:nil];
-//    
-//    AVAssetExportSession *assetExport = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
-//    assetExport.outputFileType = @"com.apple.quicktime-movie";
-//    assetExport.outputURL = outputFileURL;
-//    
-//    [assetExport exportAsynchronouslyWithCompletionHandler:^(void) {
-//        [self saveVideoToAlbum:outputFilePath];
-//    }];
 //}
+
+
+- (void) addAudioToFileAtPath {
+    AVMutableComposition *mixComposition = [AVMutableComposition composition]; // RETURN A NEW COMPOSITION
+    
+    NSURL *audioInputFileURL = self.audioRecorder.audioURL;
+    
+    NSURL *videoInputFileURL = self.scratchModeVideoURL;
+    
+  //  NSString *outputFileName = @"outputfileName"; //PASS IN FILE NAME
+    NSString *outputFileName = @"export.mov";
+    NSString *outputFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:outputFileName];
+    NSURL *outputFileURL = [NSURL fileURLWithPath:outputFilePath];
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:[outputFileURL path]])
+        [[NSFileManager defaultManager] removeItemAtPath:[outputFileURL path] error:nil];
+    
+    CMTime nextClipStartTime = kCMTimeZero;
+    
+    AVURLAsset *videoAsset = [[AVURLAsset alloc] initWithURL:videoInputFileURL options:nil];
+    CMTimeRange videoTimeRange = CMTimeRangeMake(kCMTimeZero, videoAsset.duration);
+    AVMutableCompositionTrack *compositionVideoTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeVideo preferredTrackID:kCMPersistentTrackID_Invalid];
+    [compositionVideoTrack insertTimeRange:videoTimeRange ofTrack:[[videoAsset tracksWithMediaType:AVMediaTypeVideo] objectAtIndex:0] atTime:nextClipStartTime error:nil];
+    
+    AVURLAsset *audioAsset = [[AVURLAsset alloc] initWithURL:audioInputFileURL options:nil];
+    CMTimeRange audioTimeRange = CMTimeRangeMake(kCMTimeZero, audioAsset.duration);
+    AVMutableCompositionTrack *compositionAudioTrack = [mixComposition addMutableTrackWithMediaType:AVMediaTypeAudio preferredTrackID:kCMPersistentTrackID_Invalid];
+    [compositionAudioTrack insertTimeRange:audioTimeRange ofTrack:[[audioAsset tracksWithMediaType:AVMediaTypeAudio] objectAtIndex:0] atTime:nextClipStartTime error:nil];
+    
+    AVAssetExportSession *assetExport = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
+    assetExport.outputFileType = @"com.apple.quicktime-movie";
+    assetExport.outputURL = outputFileURL;
+    NSLog(@"%@", assetExport.outputURL);
+    
+    [assetExport exportAsynchronouslyWithCompletionHandler:^(void) {
+        //[self saveVideoToAlbum:outputFilePath];
+        //[self playCapture:assetExport.outputURL];
+        [self saveVideoToCameraRoll:assetExport.outputURL];
+    }];
+}
+
+-(void) saveVideoToCameraRoll:(NSURL *)outputFileURL {
+//      NSLog(@"%hhd", recordedSuccessfully);
+//      if (recordedSuccessfully)
+//     {   //VideoPreviewLayer *vidPreview = [[VideoPreviewLayer alloc] init];
+//            vidPreview.view.frame = self.view.frame;
+//             [self createThumbnailForVideoURL:outputFileURL];
+            ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+
+            [library writeVideoAtPathToSavedPhotosAlbum:outputFileURL
+                                        completionBlock:^(NSURL *assetURL, NSError *error)
+             {
+                 UIAlertView *alert;
+                 if (!error)
+                 {
+                     alert = [[UIAlertView alloc] initWithTitle:@"Video Saved"
+                                                        message:@"The movie was successfully saved to your photos library"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil, nil];
+                 }
+                 else
+                 {
+                     alert = [[UIAlertView alloc] initWithTitle:@"Error Saving Video"
+                                                        message:@"The movie was not saved to your photos library"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil, nil];
+                 }
+
+                 [alert show];
+
+
+             }
+             ];
+     //}
+
+}
 
 
 - (void)viewMovieAtUrl:(NSURL *)fileURL

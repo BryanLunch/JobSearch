@@ -7,6 +7,7 @@
 //
 
 #import "AudioRecorder.h"
+//#import "ImageArrayPreview.h"
 
 @implementation AudioRecorder
 
@@ -77,9 +78,10 @@
 
 - (void) stopRecording {
     [self.recorder stop];
-//    ImageArrayPreview *imageArrayPreview = [[ImageArrayPreview alloc]init];
-//    imageArrayPreview.audioURL = self.recorder.url;
-//    NSLog(@"%@", imageArrayPreview.audioURL);
+    self.audioURL = self.recorder.url;
+//    self.imageArrayPreview = [[ImageArrayPreview alloc]init];
+//    self.imageArrayPreview.scratchModeAudioURL = self.audioURL;
+//    NSLog(@"SCRATCH MODE URL %@", self.imageArrayPreview.scratchModeAudioURL);
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
     [audioSession setActive:NO error:nil];
 }

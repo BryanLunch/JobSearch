@@ -9,6 +9,9 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import <CoreData/CoreData.h>
+
+//@class ImageArrayPreview;
 
 @interface AudioRecorder : NSObject <AVAudioRecorderDelegate, AVAudioPlayerDelegate>
 
@@ -19,6 +22,7 @@
 @property (strong, nonatomic) AVAudioRecorder *recorder;
 @property (strong, nonatomic) AVAudioPlayer *player;
 @property (strong, nonatomic) NSURL *audioURL;
+//@property (strong, nonatomic) ImageArrayPreview *imageArrayPreview;
 
 - (void) recorderSetup;
 - (void) recordPauseTapped;

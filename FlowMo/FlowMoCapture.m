@@ -166,7 +166,7 @@ self.movieOutput = [[AVCaptureMovieFileOutput alloc]init];
             if ( [[port mediaType] isEqual:AVMediaTypeVideo] )
             {
                 videoConnection = connection;
-            
+                self.captureConnection = connection;
             }
         }
     }
@@ -174,21 +174,6 @@ self.movieOutput = [[AVCaptureMovieFileOutput alloc]init];
     
     if([videoConnection isVideoOrientationSupported])
     {
-        
-        if ([[UIDevice currentDevice] orientation] == 3) {
-            NSLog(@"Landscape left");
-            [videoConnection setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
-        } else if ([[UIDevice currentDevice] orientation] == 4) {
-            NSLog(@"Landscape right");
-            [videoConnection setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
-        } else if ([[UIDevice currentDevice] orientation] == 1) {
-            NSLog(@"Portrait");
-            [videoConnection setVideoOrientation:AVCaptureVideoOrientationPortrait];
-        } else if ([[UIDevice currentDevice] orientation] == 2) {
-            NSLog(@"Upside down");
-            [videoConnection setVideoOrientation:AVCaptureVideoOrientationPortraitUpsideDown];
-        }
-
         NSLog(@"%ld", (long)[[UIDevice currentDevice] orientation]);
         NSLog(@"%ld currentVideoOrientation" , (long)videoConnection.videoOrientation);
     }
@@ -227,6 +212,19 @@ self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     // LANDSCAPE LEFT = 3
     // LANDSCAPE RIGHT = 4
     
+    if ([[UIDevice currentDevice] orientation] == 3) {
+        NSLog(@"Landscape left");
+        [self.captureConnection setVideoOrientation:AVCaptureVideoOrientationLandscapeLeft];
+    } else if ([[UIDevice currentDevice] orientation] == 4) {
+        NSLog(@"Landscape right");
+        [self.captureConnection setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
+    } else if ([[UIDevice currentDevice] orientation] == 1) {
+        NSLog(@"Portrait");
+        [self.captureConnection setVideoOrientation:AVCaptureVideoOrientationPortrait];
+    } else if ([[UIDevice currentDevice] orientation] == 2) {
+        NSLog(@"Upside down");
+        [self.captureConnection setVideoOrientation:AVCaptureVideoOrientationPortraitUpsideDown];
+    }
 
     
     
