@@ -538,12 +538,12 @@ BOOL ScratchModeOn = NO;
     if ([FBSDKMessengerSharer messengerPlatformCapabilities] & FBSDKMessengerPlatformCapabilityImage) {
         NSInteger currentImageIndex = (self.imageSlider.value);
         UIImage *image = [self.imageArray objectAtIndex:currentImageIndex];
-        FixImageOrientation *fixOrientation = [[FixImageOrientation alloc] init];
-        UIImage *rotatedImage = [fixOrientation scaleAndRotateImage:image];
+//        FixImageOrientation *fixOrientation = [[FixImageOrientation alloc] init];
+//        UIImage *rotatedImage = [fixOrientation scaleAndRotateImage:image];
          //[self scaleAndRotateImage:image];
         // UIImage *image = [UIImage imageNamed:@"selfie_pic"];
         
-        [FBSDKMessengerSharer shareImage:rotatedImage withOptions:nil];
+        [FBSDKMessengerSharer shareImage:image withOptions:nil];
     }
 }
 
